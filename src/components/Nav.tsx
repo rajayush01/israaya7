@@ -23,7 +23,7 @@ export default function Nav({ transparentOnTop = false }: NavProps) {
     if (!transparentOnTop) return;
     const onScroll = () => setScrolled(window.scrollY > 80);
     onScroll();
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [transparentOnTop]);
 
@@ -31,47 +31,59 @@ export default function Nav({ transparentOnTop = false }: NavProps) {
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-[500] flex items-center justify-between transition-all duration-500 ${
-          isTransparent
-            ? "bg-transparent px-[5vw] text-ivory"
-            : "bg-ivory/90 backdrop-blur-md  px-[5vw] shadow-[0_1px_0_rgba(44,33,29,0.06)] text-espresso"
-        }`}
-      >
-        <Link to="/" className="font-display text-xl tracking-[0.32em]">
-          <img src={logo} alt="Israya Logo" className="h-20"/>
-        </Link>
-
-        <div className="hidden md:flex gap-10 text-xs tracking-[0.12em] uppercase">
-          {LINKS.map((l) => (
-            <Link
-              key={l.label}
-              to={l.to}
-              className={`reveal-underline ${location.pathname === l.to ? "active" : ""}`}
-            >
-              {l.label}
-            </Link>
-          ))}
-        </div>
-
-        <div className="hidden md:flex gap-6 text-xs tracking-[0.08em] uppercase">
-          <span className="hoverable">Search</span>
-          <a href="https://wa.me/" target="_blank" rel="noreferrer" className="hoverable">
-            WhatsApp
-          </a>
-          <span className="hoverable">Wishlist</span>
-        </div>
-
-        <button
-          className="md:hidden text-[11px] tracking-[0.2em] uppercase"
-          onClick={() => setMenuOpen(true)}
+      <header className="fixed top-3 md:top-5 inset-x-0 z-[500] px-3 md:px-8 pointer-events-none">
+        <nav
+          className={`pointer-events-auto mx-auto max-w-7xl rounded-full border backdrop-blur-md transition-all duration-500 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr] h-16 md:h-20 px-6 md:px-10 ${
+            isTransparent
+              ? "bg-ivory/10 border-ivory/25 text-ivory"
+              : "bg-ivory/90 border-espresso/10 text-espresso shadow-[0_8px_30px_-12px_rgba(44,33,29,0.3)]"
+          }`}
         >
-          Menu
-        </button>
-      </nav>
+          {/* logo */}
+          <Link to="/" aria-label="Israaya home" className="justify-self-start flex items-center">
+            <img
+              src={logo}
+              alt="Israaya Logo"
+              className="h-9 md:h-12 w-auto object-contain select-none"
+              draggable={false}
+            />
+          </Link>
+
+          {/* center links */}
+          <div className="hidden md:flex justify-center gap-10 text-xs tracking-[0.12em] uppercase">
+            {LINKS.map((l) => (
+              <Link
+                key={l.label}
+                to={l.to}
+                className={`reveal-underline ${location.pathname === l.to ? "active" : ""}`}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* right actions */}
+          <div className="hidden md:flex justify-self-end gap-6 text-xs tracking-[0.08em] uppercase">
+            <span className="hoverable">Search</span>
+            <a href="https://wa.me/" target="_blank" rel="noreferrer" className="hoverable">
+              WhatsApp
+            </a>
+            <span className="hoverable">Wishlist</span>
+          </div>
+
+          {/* mobile toggle */}
+          <button
+            className="md:hidden text-[11px] tracking-[0.2em] uppercase"
+            aria-label="Open menu"
+            onClick={() => setMenuOpen(true)}
+          >
+            Menu
+          </button>
+        </nav>
+      </header>
 
       {menuOpen && (
-        <div className="fixed inset-0 z-[600] bg-ivory flex flex-col items-center justify-center gap-8">
+        <div className="fixed inset-0 z-[600] bg-ivory text-espresso flex flex-col items-center justify-center gap-8">
           <button
             className="absolute top-7 right-[5vw] text-[11px] tracking-[0.2em] uppercase"
             onClick={() => setMenuOpen(false)}
