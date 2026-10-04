@@ -71,6 +71,15 @@ export default function Nav({ transparentOnTop = false }: NavProps) {
               : "bg-ivory/90 border-espresso/10 text-espresso shadow-[0_8px_30px_-12px_rgba(44,33,29,0.3)]"
           }`}
         >
+          {/* center: logo */}
+          <Link to="/" aria-label="Israaya home" className="flex items-center">
+            <img
+              src={logo}
+              alt="Israaya Logo"
+              className="h-12 md:h-20 w-auto object-contain select-none"
+              draggable={false}
+            />
+          </Link>
           {/* left: links (desktop) / menu button (mobile + tablet) */}
           <div className="justify-self-start">
             <div className="hidden lg:flex gap-6 xl:gap-8 text-xs tracking-[0.12em] uppercase">
@@ -93,15 +102,7 @@ export default function Nav({ transparentOnTop = false }: NavProps) {
             </button>
           </div>
 
-          {/* center: logo */}
-          <Link to="/" aria-label="Israaya home" className="flex items-center justify-center">
-            <img
-              src={logo}
-              alt="Israaya Logo"
-              className="h-9 md:h-12 w-auto object-contain select-none"
-              draggable={false}
-            />
-          </Link>
+          
 
           {/* right: icons */}
           <div className="justify-self-end flex items-center gap-3 md:gap-5">
