@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="1200" height="1500">
+  <defs>
+    <linearGradient id="wallB" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#B89A5B"/>
+      <stop offset="60%" stop-color="#7D1638"/>
+      <stop offset="100%" stop-color="#2C211D"/>
+    </linearGradient>
+    <linearGradient id="doorB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#570D26"/>
+      <stop offset="100%" stop-color="#2C211D"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#wallB)"/>
+  <!-- door frame -->
+  <rect x="330" y="260" width="540" height="1240" fill="url(#doorB)" stroke="#B89A5B" stroke-width="8"/>
+  <!-- panels -->
+  <g stroke="#B89A5B" stroke-width="3" fill="none" opacity="0.7">
+    <rect x="380" y="320" width="180" height="380" rx="10"/>
+    <rect x="640" y="320" width="180" height="380" rx="10"/>
+    <rect x="380" y="740" width="180" height="380" rx="10"/>
+    <rect x="640" y="740" width="180" height="380" rx="10"/>
+  </g>
+  <!-- carved medallions -->
+  <g fill="#B89A5B" opacity="0.6">
+    <circle cx="470" cy="510" r="26"/>
+    <circle cx="730" cy="510" r="26"/>
+    <circle cx="470" cy="930" r="26"/>
+    <circle cx="730" cy="930" r="26"/>
+  </g>
+  <!-- handle -->
+  <circle cx="800" cy="800" r="10" fill="#F5F1E8" opacity="0.8"/>
+  <!-- wall texture -->
+  <g stroke="#2C211D" stroke-opacity="0.1" stroke-width="2">
+    <line x1="0" y1="120" x2="1200" y2="120"/>
+    <line x1="0" y1="1450" x2="1200" y2="1450"/>
+  </g>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="1200" height="1500">
+  <defs>
+    <pattern id="weave" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="#F5F1E8"/>
+      <rect x="0" y="0" width="40" height="18" fill="#E8B8A7" opacity="0.6"/>
+      <rect x="0" y="0" width="18" height="40" fill="#C9827A" opacity="0.35"/>
+    </pattern>
+    <linearGradient id="knitShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2C211D" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#2C211D" stop-opacity="0.25"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#weave)"/>
+  <rect width="1200" height="1500" fill="url(#knitShade)"/>
+</svg>

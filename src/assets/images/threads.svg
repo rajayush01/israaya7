@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="1200" height="1500">
+  <defs>
+    <linearGradient id="clothE" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F5F1E8"/>
+      <stop offset="100%" stop-color="#E8B8A7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#clothE)"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M100 200 C 300 100, 500 400, 300 500 S 100 800, 400 850" stroke="#B89A5B" stroke-width="6" opacity="0.8"/>
+    <path d="M900 150 C 700 300, 1000 450, 800 600 S 1050 900, 750 1000" stroke="#7D1638" stroke-width="6" opacity="0.8"/>
+    <path d="M200 950 C 450 900, 500 1150, 300 1250 S 550 1450, 850 1400" stroke="#C9827A" stroke-width="6" opacity="0.85"/>
+    <path d="M850 1050 C 700 1150, 950 1250, 800 1400" stroke="#B89A5B" stroke-width="4" opacity="0.6"/>
+  </g>
+  <g fill="#7D1638" opacity="0.7">
+    <circle cx="300" cy="500" r="9"/>
+    <circle cx="400" cy="850" r="9"/>
+    <circle cx="800" cy="600" r="9"/>
+    <circle cx="750" cy="1000" r="9"/>
+    <circle cx="300" cy="1250" r="9"/>
+    <circle cx="850" cy="1400" r="9"/>
+  </g>
+  <g fill="#B89A5B" opacity="0.9">
+    <circle cx="100" cy="200" r="6"/>
+    <circle cx="900" cy="150" r="6"/>
+    <circle cx="200" cy="950" r="6"/>
+  </g>
+</svg>

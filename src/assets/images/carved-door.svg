@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="1200" height="1500">
+  <defs>
+    <linearGradient id="wallC" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E8B8A7"/>
+      <stop offset="100%" stop-color="#570D26"/>
+    </linearGradient>
+    <linearGradient id="doorC" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2C211D"/>
+      <stop offset="100%" stop-color="#570D26"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#wallC)"/>
+  <rect x="220" y="220" width="760" height="1280" fill="url(#doorC)" stroke="#B89A5B" stroke-width="8"/>
+  <line x1="600" y1="220" x2="600" y2="1500" stroke="#B89A5B" stroke-width="6" opacity="0.7"/>
+  <g stroke="#B89A5B" stroke-width="3" fill="none" opacity="0.6">
+    <rect x="270" y="280" width="280" height="500" rx="14"/>
+    <rect x="650" y="280" width="280" height="500" rx="14"/>
+    <rect x="270" y="820" width="280" height="560" rx="14"/>
+    <rect x="650" y="820" width="280" height="560" rx="14"/>
+  </g>
+  <g fill="#B89A5B" opacity="0.55">
+    <circle cx="410" cy="530" r="34"/>
+    <circle cx="790" cy="530" r="34"/>
+    <circle cx="410" cy="1100" r="34"/>
+    <circle cx="790" cy="1100" r="34"/>
+  </g>
+  <g stroke="#F5F1E8" stroke-opacity="0.25" stroke-width="2">
+    <path d="M410 496 l0 68 M376 530 l68 0"/>
+    <path d="M790 496 l0 68 M756 530 l68 0"/>
+  </g>
+</svg>

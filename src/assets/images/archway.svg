@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="1200" height="1500">
+  <defs>
+    <linearGradient id="skyA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E8B8A7"/>
+      <stop offset="55%" stop-color="#C9827A"/>
+      <stop offset="100%" stop-color="#7D1638"/>
+    </linearGradient>
+    <linearGradient id="archA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#570D26"/>
+      <stop offset="100%" stop-color="#2C211D"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#F5F1E8" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#F5F1E8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#skyA)"/>
+  <rect width="1200" height="1500" fill="url(#glowA)"/>
+  <!-- arch structure -->
+  <path d="M300 1500 V700 A300 300 0 0 1 900 700 V1500 Z" fill="url(#archA)" opacity="0.88"/>
+  <path d="M370 1500 V730 A230 230 0 0 1 830 730 V1500 Z" fill="#E8B8A7" opacity="0.18"/>
+  <!-- inner arch glow -->
+  <path d="M420 1500 V760 A180 180 0 0 1 780 760 V1500 Z" fill="url(#skyA)" opacity="0.9"/>
+  <!-- decorative gold line trim -->
+  <path d="M300 700 A300 300 0 0 1 900 700" fill="none" stroke="#B89A5B" stroke-width="6" opacity="0.8"/>
+  <path d="M370 730 A230 230 0 0 1 830 730" fill="none" stroke="#B89A5B" stroke-width="3" opacity="0.5"/>
+  <!-- ground texture lines -->
+  <g stroke="#2C211D" stroke-opacity="0.12" stroke-width="2">
+    <line x1="0" y1="1300" x2="1200" y2="1300"/>
+    <line x1="0" y1="1360" x2="1200" y2="1360"/>
+    <line x1="0" y1="1420" x2="1200" y2="1420"/>
+  </g>
+  <!-- floating gold motif dots -->
+  <g fill="#B89A5B" opacity="0.5">
+    <circle cx="150" cy="200" r="4"/>
+    <circle cx="1050" cy="260" r="3"/>
+    <circle cx="200" cy="420" r="3"/>
+    <circle cx="1000" cy="500" r="4"/>
+  </g>
+</svg>

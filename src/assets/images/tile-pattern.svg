@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="1200" height="1500">
+  <defs>
+    <pattern id="tiles" width="150" height="150" patternUnits="userSpaceOnUse">
+      <rect width="150" height="150" fill="#F5F1E8"/>
+      <path d="M75 10 L140 75 L75 140 L10 75 Z" fill="#C9827A" opacity="0.5"/>
+      <circle cx="75" cy="75" r="20" fill="#B89A5B" opacity="0.6"/>
+      <path d="M75 10 L140 75 L75 140 L10 75 Z" fill="none" stroke="#7D1638" stroke-width="2" opacity="0.4"/>
+    </pattern>
+    <linearGradient id="tileFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2C211D" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#2C211D" stop-opacity="0.35"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#tiles)"/>
+  <rect width="1200" height="1500" fill="url(#tileFade)"/>
+</svg>
