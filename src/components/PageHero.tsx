@@ -13,7 +13,7 @@ interface PageHeroProps {
 export default function PageHero({ eyebrow, title, texture, label, image, height = "56vh" }: PageHeroProps) {
   return (
     <section className="relative flex items-end overflow-hidden" style={{ height, minHeight: 380 }}>
-      <ImageSlot texture={texture} image={image} label={label}>
+      <ImageSlot texture={texture} image={image} label={label} priority>
         <div className="absolute inset-0 bg-gradient-to-t from-espresso/55 to-transparent" />
       </ImageSlot>
       <div className="relative z-[2] text-ivory px-[5vw] pb-[50px]">

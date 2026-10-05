@@ -55,7 +55,6 @@ export default function Shop() {
           {filtered.map((p) => (
             <motion.div
               key={p.slug}
-              layout
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -63,6 +62,7 @@ export default function Shop() {
               <Link to={`/product/${p.slug}`} className="group block hoverable">
                 <div className="relative aspect-[3/4] overflow-hidden rounded-sm mb-3.5">
                   <ImageSlot
+                    sizes="(min-width:768px) 33vw, 50vw"
                     texture={p.texture}
                     image={p.image}
                     label={p.name}

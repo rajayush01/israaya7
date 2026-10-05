@@ -20,6 +20,11 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+img {
+  max-width: 100%;
 }
 
 body {
@@ -118,4 +123,26 @@ a {
 .reveal-underline:hover::after,
 .reveal-underline.active::after {
   width: 100%;
+}
+
+
+/* ---- Compositor-only loops (run off the main thread, no JS per frame) ---- */
+@keyframes marquee-x {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+@keyframes scroll-cue {
+  0%   { transform: translate3d(0, -100%, 0); }
+  100% { transform: translate3d(0, 300%, 0); }
+}
+.anim-marquee  { animation: marquee-x 28s linear infinite; will-change: transform; }
+.anim-spin     { animation: spin-slow 22s linear infinite; will-change: transform; }
+.anim-cue      { animation: scroll-cue 2.2s ease-in-out infinite; will-change: transform; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-marquee, .anim-spin, .anim-cue { animation: none; }
+  html { scroll-behavior: auto; }
 }

@@ -48,7 +48,7 @@ export default function Product() {
               image: img,
             })).map((v, i) => (
               <div key={i} className="relative aspect-[3/4] overflow-hidden rounded-sm mb-4">
-                <ImageSlot texture={v.texture} image={v.image} label={`${product.name} — view ${i + 1}`} />
+                <ImageSlot texture={v.texture} image={v.image} label={`${product.name} — view ${i + 1}`} priority={i === 0} sizes="(min-width:768px) 55vw, 100vw" />
               </div>
             ))}
           </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   motion,
@@ -14,17 +14,19 @@ import Footer from "../components/Footer";
 import ImageSlot from "../components/ImageSlot";
 import ChapterStorytelling from "../components/ChapterStorytelling";
 import { PRODUCTS } from "../data/products";
-import { IMAGES } from "../lib/images";
+import { IMAGES, prefetchImages } from "../lib/images";
 import logo from "../assets/ISRAAYA LOGO.svg";
 import logo1 from "../assets/ISRAAYA MOTIF.svg";
 import HERO_VIDEO from "../assets/israaya-video.mp4";
+import HERO_VIDEO_SMALL from "../assets/israaya-video-720.mp4";
 
 /* ------------------------------------------------------------------ */
 /*  CONFIG — swap these for your R2 URLs                              */
 /* ------------------------------------------------------------------ */
 // const HERO_VIDEO = "/videos/hero.mp4"; // H.264 mp4, ~1080p, under 4 MB, loopable
 // const HERO_VIDEO_WEBM = "/videos/hero.webm"; // optional smaller fallback source
-const HERO_POSTER = IMAGES.homeHero; // shown until the video is ready
+// Tiny same-origin poster (preloaded in index.html) so the hero paints instantly
+const HERO_POSTER = "/hero-poster.webp";
 
 const EASE = [0.76, 0, 0.24, 1] as const;
 
@@ -115,34 +117,64 @@ function Eyebrow({ children, light = false }: { children: React.ReactNode; light
 function Preloader({ onDone }: { onDone: () => void }) {
   const [count, setCount] = useState(0);
   const [leaving, setLeaving] = useState(false);
+  const [gone, setGone] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    let n = 0;
-    const id = setInterval(() => {
-      n = Math.min(100, n + Math.ceil(Math.random() * 9));
-      setCount(n);
-      if (n >= 100) {
-        clearInterval(id);
-        setTimeout(() => {
-          setLeaving(true);
-          document.body.style.overflow = "";
-          onDone();
-        }, 300);
+    let raf = 0;
+    let finished = false;
+    let ready = false;
+    let shown = 0;
+    const t0 = performance.now();
+    const MIN = 700; // never flash
+    const MAX = 3000; // never hang
+
+    // "Ready" = hero poster decoded + fonts loaded (whichever comes first with the MAX cap)
+    const poster = new Image();
+    poster.src = HERO_POSTER;
+    Promise.all([poster.decode().catch(() => {}), document.fonts?.ready ?? Promise.resolve()]).then(() => {
+      ready = true;
+    });
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      setLeaving(true);
+      document.body.style.overflow = "";
+      onDone();
+    };
+
+    const tick = (now: number) => {
+      const elapsed = now - t0;
+      // glide toward 90% while loading, snap to 100% once ready
+      const target = ready && elapsed > MIN ? 100 : Math.min(90, (elapsed / 1400) * 90);
+      shown += (target - shown) * 0.12;
+      const n = Math.min(100, Math.round(shown + (target === 100 ? 1 : 0)));
+      setCount((c) => (c === n ? c : n));
+      if ((target === 100 && n >= 99) || elapsed > MAX) {
+        setCount(100);
+        setTimeout(finish, 200);
+        return;
       }
-    }, 55);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
     return () => {
-      clearInterval(id);
+      cancelAnimationFrame(raf);
       document.body.style.overflow = "";
     };
   }, [onDone]);
+
+  if (gone) return null;
 
   return (
     <motion.div
       initial={{ y: 0 }}
       animate={{ y: leaving ? "-100%" : 0 }}
       transition={{ duration: 1.1, ease: EASE }}
-      style={{ pointerEvents: leaving ? "none" : "auto" }}
+      onAnimationComplete={() => leaving && setGone(true)}
+      style={{ pointerEvents: leaving ? "none" : "auto", willChange: "transform" }}
       className="fixed inset-0 z-[10000] bg-ivory flex flex-col items-center justify-center"
     >
       <div className="flex items-center">
@@ -151,10 +183,9 @@ function Preloader({ onDone }: { onDone: () => void }) {
       </div>
       <div className="absolute left-[5vw] right-[5vw] bottom-[5vw] flex items-end justify-between">
         <div className="relative h-px flex-1 bg-gold/25 mr-8 overflow-hidden">
-          <motion.div
+          <div
             className="absolute inset-0 bg-gold origin-left"
-            animate={{ scaleX: count / 100 }}
-            transition={{ duration: 0.2, ease: "linear" }}
+            style={{ transform: `scaleX(${count / 100})`, transition: "transform .15s linear" }}
           />
         </div>
         <span className="font-display text-5xl md:text-7xl leading-none text-gold tabular-nums">
@@ -171,28 +202,53 @@ function Preloader({ onDone }: { onDone: () => void }) {
 function Hero({ loaded }: { loaded: boolean }) {
   const ref = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoReady, setVideoReady] = useState(false);
   const [muted, setMuted] = useState(true);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const clipPath = useTransform(
-    scrollYProgress,
-    [0, 0.8],
-    ["inset(0vw 0vw 0vw 0vw round 0px)", "inset(4vw 6vw 4vw 6vw round 28px)"]
-  );
-  const videoScale = useTransform(scrollYProgress, [0, 1], [1, 1.18]);
+  // transform + radius only: the browser can do this on the GPU without re-rasterising the video
+  // (the old animated clip-path forced a repaint of the playing video on every scroll frame)
+  const frameScale = useTransform(scrollYProgress, [0, 0.8], [1, 0.88]);
+  const frameRadius = useTransform(scrollYProgress, [0, 0.8], [0, 28]);
+  const videoScale = useTransform(scrollYProgress, [0, 1], [1, 1.12]);
   const textY = useTransform(scrollYProgress, [0, 1], ["0%", "-30%"]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
+  // Pick the right file only AFTER the page has loaded so the video never fights
+  // the images/fonts for bandwidth; skip it entirely on Save-Data / reduced-motion.
+  useEffect(() => {
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (conn?.saveData || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const pick = () => setVideoSrc(window.innerWidth < 900 ? HERO_VIDEO_SMALL : HERO_VIDEO);
+    if (document.readyState === "complete") {
+      const id = setTimeout(pick, 300);
+      return () => clearTimeout(id);
+    }
+    window.addEventListener("load", pick, { once: true });
+    return () => window.removeEventListener("load", pick);
+  }, []);
+
+  // Only decode video while the hero is actually on screen
   useEffect(() => {
     const v = videoRef.current;
-    if (!v) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      v.pause();
-      return;
-    }
-    v.play().catch(() => {});
-  }, []);
+    const el = ref.current;
+    if (!v || !el || !videoSrc) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) v.play().catch(() => {});
+        else v.pause();
+      },
+      { threshold: 0.05 }
+    );
+    io.observe(el);
+    const onVis = () => (document.hidden ? v.pause() : undefined);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [videoSrc]);
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = muted;
@@ -201,28 +257,24 @@ function Hero({ loaded }: { loaded: boolean }) {
   return (
     <section ref={ref} className="relative h-[100svh] min-h-[640px] bg-espresso">
       {/* video frame */}
-      <motion.div style={{ clipPath }} className="absolute inset-0 overflow-hidden">
-        <motion.div style={{ scale: videoScale }} className="absolute inset-0">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${HERO_POSTER})`, backgroundPosition: "50% 35%" }}
-          />
+      <motion.div
+        style={{ scale: frameScale, borderRadius: frameRadius, willChange: "transform" }}
+        className="absolute inset-0 overflow-hidden origin-center"
+      >
+        <motion.div style={{ scale: videoScale, willChange: "transform" }} className="absolute inset-0">
           <video
             ref={videoRef}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-              videoReady ? "opacity-100" : "opacity-0"
-            }`}
+            key={videoSrc ?? "poster"}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: "50% 35%" }}
             autoPlay
             muted
             loop
             playsInline
-            preload="auto"
+            preload="metadata"
             poster={HERO_POSTER}
-            onLoadedData={() => setVideoReady(true)}
-          >
-            {/* <source src={HERO_VIDEO_WEBM} type="video/webm" /> */}
-            <source src={HERO_VIDEO} type="video/mp4" />
-          </video>
+            src={videoSrc ?? undefined}
+          />
         </motion.div>
         <div
           className="absolute inset-0"
@@ -276,7 +328,7 @@ function Hero({ loaded }: { loaded: boolean }) {
           </button>
           <Link
             to="/shop"
-            className="group hoverable inline-flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase border-b border-ivory/40 pb-1.5 hover:border-gold hover:gap-4 transition-all"
+            className="group hoverable inline-flex items-center gap-3 text-[11px] tracking-[0.22em] uppercase border-b border-ivory/40 pb-1.5 hover:gap-4 transition-all"
           >
             Discover the Collection
             <Arrow className="group-hover:translate-x-1 transition-transform" />
@@ -287,11 +339,7 @@ function Hero({ loaded }: { loaded: boolean }) {
       {/* scroll cue */}
       <div className="hidden md:block absolute right-[2.2vw] top-1/2 -translate-y-1/2 z-[2]">
         <div className="relative h-24 w-px bg-ivory/25 overflow-hidden">
-          <motion.div
-            className="absolute inset-x-0 h-8 bg-gold"
-            animate={{ y: ["-100%", "300%"] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-          />
+          <div className="absolute inset-x-0 h-8 bg-gold anim-cue" />
         </div>
       </div>
     </section>
@@ -408,13 +456,18 @@ function CraftSection() {
   const x = useTransform(scrollYProgress, [0, 1], [0, -dist]);
 
   useEffect(() => {
+    let raf = 0;
     const measure = () => {
-      if (trackRef.current) setDist(Math.max(0, trackRef.current.scrollWidth - window.innerWidth));
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        if (trackRef.current) setDist(Math.max(0, trackRef.current.scrollWidth - window.innerWidth));
+      });
     };
     measure();
     window.addEventListener("resize", measure);
     window.addEventListener("load", measure);
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener("resize", measure);
       window.removeEventListener("load", measure);
     };
@@ -425,7 +478,7 @@ function CraftSection() {
       {/* Desktop — pinned */}
       <section ref={ref} className="hidden md:block relative h-[420vh] bg-espresso text-ivory">
         <div className="sticky top-0 h-screen overflow-hidden flex items-center">
-          <motion.div ref={trackRef} style={{ x }} className="flex items-center gap-[4vw] pl-[5vw] pr-[10vw] w-max">
+          <motion.div ref={trackRef} style={{ x, willChange: "transform" }} className="flex items-center gap-[4vw] pl-[5vw] pr-[10vw] w-max">
             <div className="w-[34vw] shrink-0">
               <CraftIntro />
             </div>
@@ -436,7 +489,7 @@ function CraftSection() {
                   i % 2 ? "translate-y-[7vh]" : "-translate-y-[7vh]"
                 }`}
               >
-                <ImageSlot texture={c.texture} image={c.image} label={c.tag} />
+                <ImageSlot texture={c.texture} image={c.image} label={c.tag} eager sizes="35vw" />
                 <div className="absolute inset-0 bg-gradient-to-t from-espresso/60 via-transparent to-transparent" />
                 <span className="absolute bottom-5 left-5 font-serif italic text-2xl text-ivory">{c.tag}</span>
               </div>
@@ -463,7 +516,7 @@ function CraftSection() {
               key={c.tag}
               className="relative snap-center shrink-0 w-[72vw] aspect-[3/4] overflow-hidden rounded-sm"
             >
-              <ImageSlot texture={c.texture} image={c.image} label={c.tag} />
+              <ImageSlot texture={c.texture} image={c.image} label={c.tag} sizes="72vw" />
               <div className="absolute inset-0 bg-gradient-to-t from-espresso/60 via-transparent to-transparent" />
               <span className="absolute bottom-4 left-4 font-serif italic text-xl text-ivory">{c.tag}</span>
             </div>
@@ -520,7 +573,7 @@ function FeaturedEdit() {
           >
             {/* mobile thumbnail */}
             <div className="md:hidden relative w-20 aspect-[3/4] shrink-0 overflow-hidden rounded-sm">
-              <ImageSlot texture={p.texture} image={p.image} label={p.name} />
+              <ImageSlot texture={p.texture} image={p.image} label={p.name} sizes="80px" />
             </div>
 
             <div
@@ -555,6 +608,8 @@ function FeaturedEdit() {
               texture={items[hover].texture}
               image={items[hover].image}
               label={items[hover].name}
+              eager
+              sizes="240px"
             />
           </motion.div>
         )}
@@ -591,10 +646,28 @@ function Closing() {
 /* ------------------------------------------------------------------ */
 export default function Home() {
   const [loaded, setLoaded] = useState(false);
+  const onDone = useCallback(() => setLoaded(true), []);
+
+  // After the page is idle, quietly pull in the images further down so they're
+  // already cached by the time you scroll to them (2 at a time, hero first).
+  useEffect(() => {
+    prefetchImages([
+      IMAGES.reveal1,
+      IMAGES.reveal2,
+      IMAGES.reveal3,
+      IMAGES.reveal4,
+      IMAGES.craftZardozi,
+      IMAGES.craftDori,
+      IMAGES.craftResham,
+      IMAGES.craftBead,
+      IMAGES.craftIndia,
+      ...PRODUCTS.slice(0, 4).map((p) => p.image),
+    ]);
+  }, []);
 
   return (
     <div>
-      <Preloader onDone={() => setLoaded(true)} />
+      <Preloader onDone={onDone} />
       <Nav transparentOnTop />
       <Hero loaded={loaded} />
       <BrandIntro />

@@ -55,3 +55,36 @@ export const IMAGES = {
 } as const;
 
 export type ImageKey = keyof typeof IMAGES;
+
+/**
+ * Warm the browser cache for below-the-fold images once the page is idle,
+ * two at a time, so scrolling never waits on the network and the hero
+ * isn't competing with them for bandwidth.
+ */
+const warmed = new Set<string>();
+export function prefetchImages(urls: string[], concurrency = 2) {
+  if (typeof window === "undefined") return;
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+  if (conn?.saveData) return;
+
+  const queue = urls.filter((u) => u && !warmed.has(u));
+  queue.forEach((u) => warmed.add(u));
+
+  const next = () => {
+    const url = queue.shift();
+    if (!url) return;
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = img.onerror = next;
+    img.src = url;
+  };
+
+  const start = () => {
+    for (let i = 0; i < concurrency; i++) next();
+  };
+  const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number })
+    .requestIdleCallback;
+  const kick = () => (idle ? idle(start, { timeout: 2500 }) : setTimeout(start, 600));
+  if (document.readyState === "complete") kick();
+  else window.addEventListener("load", kick, { once: true });
+}

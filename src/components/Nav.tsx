@@ -65,10 +65,10 @@ export default function Nav({ transparentOnTop = false }: NavProps) {
     <>
       <header className="fixed top-3 md:top-5 inset-x-0 z-[500] px-3 md:px-8 pointer-events-none">
         <nav
-          className={`pointer-events-auto mx-auto max-w-7xl rounded-full border backdrop-blur-md transition-all duration-500 grid grid-cols-[1fr_auto_1fr] items-center h-16 md:h-20 px-5 md:px-10 ${
+          className={`pointer-events-auto mx-auto max-w-7xl rounded-full border transition-[background-color,border-color,color,box-shadow] duration-500 grid grid-cols-[1fr_auto_1fr] items-center h-16 md:h-20 px-5 md:px-10 ${
             isTransparent
-              ? "bg-ivory/10 border-ivory/25 text-ivory"
-              : "bg-ivory/90 border-espresso/10 text-espresso shadow-[0_8px_30px_-12px_rgba(44,33,29,0.3)]"
+              ? "bg-espresso/30 border-ivory/25 text-ivory"
+              : "bg-ivory/95 border-espresso/10 text-espresso shadow-[0_8px_30px_-12px_rgba(44,33,29,0.3)]"
           }`}
         >
           {/* center: logo */}

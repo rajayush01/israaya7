@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback, memo } from "react";
 import {
   motion,
   AnimatePresence,
@@ -84,12 +84,8 @@ function MaskedTitle({ text }: { text: string }) {
 /* ---------- Rotating circular badge ---------- */
 function Badge() {
   return (
-    <motion.div
-      className="relative w-[110px] h-[110px] md:w-[150px] md:h-[150px]"
-      animate={{ rotate: 360 }}
-      transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-    >
-      <svg viewBox="0 0 200 200" className="w-full h-full">
+    <div className="relative w-[110px] h-[110px] md:w-[150px] md:h-[150px]">
+      <svg viewBox="0 0 200 200" className="w-full h-full anim-spin">
         <defs>
           <path id="badge-circle" d="M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0" />
         </defs>
@@ -100,12 +96,12 @@ function Badge() {
       <span className="absolute inset-0 grid place-items-center font-serif italic text-gold text-3xl">
         I
       </span>
-    </motion.div>
+    </div>
   );
 }
 
 /* ---------- A single plate with curtain reveal + parallax ---------- */
-function Plate({
+const Plate = memo(function Plate({
   plate,
   index,
   onActive,
@@ -135,6 +131,9 @@ function Plate({
         <motion.img
           src={plate.image()}
           alt={plate.label}
+          loading="lazy"
+          decoding="async"
+          sizes="(min-width:768px) 55vw, 100vw"
           style={{ y }}
           className="absolute left-0 top-[-10%] w-full h-[120%] object-cover transition-transform duration-[1400ms] group-hover:scale-[1.06]"
         />
@@ -164,18 +163,14 @@ function Plate({
       </motion.p>
     </div>
   );
-}
+});
 
 /* ---------- Craft marquee ---------- */
 function Marquee() {
   const row = [...CRAFTS, ...CRAFTS];
   return (
     <div className="overflow-hidden border-y border-gold/20 py-6 my-24 select-none">
-      <motion.div
-        className="flex w-max gap-10 items-center"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-      >
+      <div className="flex w-max gap-10 items-center anim-marquee">
         {row.map((c, i) => (
           <div key={i} className="flex items-center gap-10">
             <span
@@ -189,14 +184,15 @@ function Marquee() {
             <span className="text-gold text-2xl">✦</span>
           </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }
 
 /* ---------- Main section ---------- */
 function ChapterStorytelling() {
-  const [active, setActive] = useState(0);
+  const [active, setActiveRaw] = useState(0);
+  const setActive = useCallback((i: number) => setActiveRaw(i), []);
   const sectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
 
